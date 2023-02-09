@@ -13,11 +13,11 @@ public class HelperLogKafka {
             	 System.out.println("------------------------------------------");
             	 System.out.println("recods " + (ind++));
                  System.out.println(message1);
-                 System.out.println(record.key());
-                 System.out.println(record.value());
-                 System.out.println(record.partition());
-                 System.out.println( record.topic());
-                 System.out.println(record.offset());
+                 System.out.println("key: " + record.key());
+                 System.out.println("value: " + record.value());
+                 System.out.println("partition: " + record.partition());
+                 System.out.println("topic: "+ record.topic());
+                 System.out.println("offset: "+ record.offset());
                  try {
                      Thread.sleep(5000);
                  } catch (InterruptedException e) {
