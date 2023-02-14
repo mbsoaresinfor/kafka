@@ -3,6 +3,7 @@ package ecommerce;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.producer.Callback;
@@ -16,14 +17,15 @@ public class NewOrderMain {
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 
 		var producer = new KafkaProducer<String, String>(properties());
-				
-		var value = "chave, valor:" + new Date();
-		var message = new  ProducerRecord<>("ECOMMERCE_NEW_ORDER",value,value);
-		producer.send(message,callBack()).get();
-		
-		var value2 = "bem vindo, " + new Date();
-		var message2 = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", value2,value2);
-		producer.send(message2,callBack()).get();
+		for(int i=0; i < 5; i++) {		
+			var value = "chave, valor:" + UUID.randomUUID().toString();
+			var message = new  ProducerRecord<>("ECOMMERCE_NEW_ORDER",value,value);
+			producer.send(message,callBack()).get();
+			
+			var value2 = "bem vindo, " + UUID.randomUUID().toString();
+			var message2 = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", value2,value2);
+			producer.send(message2,callBack()).get();
+		}
 		
 		
 
