@@ -1,7 +1,6 @@
 package ecommerce;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -13,7 +12,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 public class LogService {
 
 	 public static void main(String[] args) {
-	        var consumer = new KafkaConsumer<String, String>(properties());
+	    		 
+		 var consumer = new KafkaConsumer<String, String>(properties());
 	        consumer.subscribe(Pattern.compile("ECOMMERCE.*"));
 	        while(true) {
 	            var records = consumer.poll(Duration.ofMillis(100));
