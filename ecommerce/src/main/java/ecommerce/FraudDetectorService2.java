@@ -10,7 +10,7 @@ public class FraudDetectorService2 {
 	public static void main(String[] args) {
 
 		var fraudDetectorService2 = new FraudDetectorService2();
-		var consumer = new KaftaService("ECOMMERCE_NEW_ORDER", fraudDetectorService2::consume, properties());
+		var consumer = new KaftaConsumerService("ECOMMERCE_NEW_ORDER", fraudDetectorService2::consume, properties());
 		consumer.process();
 	}
 

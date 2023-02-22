@@ -1,5 +1,7 @@
 package ecommerce;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
@@ -9,13 +11,13 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-public class KaftaService {
+public class KaftaConsumerService {
 
 	private String topic;
 	private Consumer consume;
-	private Properties props;
+	private Properties props;	
 	
-	public KaftaService(String topic,Consumer consume,Properties props) {
+	public KaftaConsumerService(String topic,Consumer consume,Properties props) {
 		this.topic = topic;
 		this.consume = consume;
 		this.props = props;
@@ -38,4 +40,6 @@ public class KaftaService {
         properties.putAll(props);
         return properties;
     }
+
+	
 }

@@ -1,21 +1,16 @@
 package ecommerce;
 
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 
 public class EmailService {
 
 	public static void main(String[] args) {
 
 		var fraudDetectorService = new FraudDetectorService();
-		var consumer = new KaftaService("ECOMMERCE_SEND_EMAIL", fraudDetectorService::consume, properties());
+		var consumer = new KaftaConsumerService("ECOMMERCE_SEND_EMAIL", fraudDetectorService::consume, properties());
 		consumer.process();
 	}
 
