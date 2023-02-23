@@ -10,11 +10,11 @@ public class FraudDetectorService2 {
 	public static void main(String[] args) {
 
 		var fraudDetectorService2 = new FraudDetectorService2();
-		var consumer = new KaftaConsumerService("ECOMMERCE_NEW_ORDER", fraudDetectorService2::consume, properties());
+		var consumer = new KaftaConsumerService("ECOMMERCE_NEW_ORDER", fraudDetectorService2::accept, properties());
 		consumer.process();
 	}
 
-	void consume(ConsumerRecords<String, String> records) {
+	void accept(ConsumerRecords<String, String> records) {
 		HelperLogKafka.log(records, "Processing new order, checking for fraud", "Order processed");
 	}
 

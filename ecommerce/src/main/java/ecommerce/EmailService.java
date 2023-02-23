@@ -10,11 +10,11 @@ public class EmailService {
 	public static void main(String[] args) {
 
 		var fraudDetectorService = new FraudDetectorService();
-		var consumer = new KaftaConsumerService("ECOMMERCE_SEND_EMAIL", fraudDetectorService::consume, properties());
+		var consumer = new KaftaConsumerService("ECOMMERCE_SEND_EMAIL", fraudDetectorService::accept, properties());
 		consumer.process();
 	}
 
-	void consume(ConsumerRecords<String, String> records) {
+	void accept(ConsumerRecords<String, String> records) {
 		HelperLogKafka.log(records, "Processing emails", "email send");
 	}
 
