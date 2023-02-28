@@ -11,23 +11,23 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-public class KaftaConsumerService {
+public class KaftaConsumerService <K,V>{
 
 	private String topic;
-	private Consumer<ConsumerRecords<String, String>> consume;
+	private Consumer<ConsumerRecords<K, V>> consume;
 	private Properties props;	
 	
-	public KaftaConsumerService(String topic,Consumer<ConsumerRecords<String, String>>  consume,Properties props) {
+	public KaftaConsumerService(String topic,Consumer<ConsumerRecords<K, V>>  consume,Properties props) {
 		this.topic = topic;
 		this.consume = consume;
 		this.props = props;
 	}
 	
 	public void process() {
-		var consumer = new KafkaConsumer<String, String>(properties());
+		var consumer = new KafkaConsumer<K, V>(properties());
 	    consumer.subscribe(Collections.singletonList(topic));
 	    while(true) {
-	        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+	        ConsumerRecords<K, V> records = consumer.poll(Duration.ofMillis(100));
 	        consume.accept(records);	        	            	            
 	    }
 	}

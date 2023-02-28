@@ -9,8 +9,8 @@ public class EmailService {
 
 	public static void main(String[] args) {
 
-		var fraudDetectorService = new FraudDetectorService();
-		var consumer = new KaftaConsumerService("ECOMMERCE_SEND_EMAIL", fraudDetectorService::accept, properties());
+		var emailService = new EmailService();
+		var consumer = new KaftaConsumerService<String,String>("ECOMMERCE_SEND_EMAIL", emailService::accept, properties());
 		consumer.process();
 	}
 

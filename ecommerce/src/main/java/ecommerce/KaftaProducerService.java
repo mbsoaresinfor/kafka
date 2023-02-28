@@ -9,12 +9,16 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 public class KaftaProducerService<K, V>{
 
-	private KafkaProducer<K,V> producer = new KafkaProducer<K,V>(properties());
+	private KafkaProducer<K,V> producer;
 	
-	public KaftaProducerService() {}
+	public KaftaProducerService() {
+		this(new Properties());
+	}
 	
 	public KaftaProducerService(Properties prop) {
-		properties().putAll(prop);
+		Properties properties = properties();
+		properties.putAll(prop);
+		producer = new KafkaProducer<K,V>(properties);		
 	}
 	
 
@@ -35,7 +39,7 @@ public class KaftaProducerService<K, V>{
 		};
 	}
 
-	private static Properties properties() {
+	private Properties properties() {
 		var properties = new Properties();
 		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
