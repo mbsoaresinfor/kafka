@@ -7,6 +7,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 public class FraudDetectorService2 {
 
+	HelperLogKafka<String, Order> helperLogKafka = new HelperLogKafka<String, Order>();
+	
 	public static void main(String[] args) {
 
 		var fraudDetectorService2 = new FraudDetectorService2();
@@ -16,8 +18,7 @@ public class FraudDetectorService2 {
 	}
 
 	void accept(ConsumerRecords<String, Order> records) {
-		//ConsumerRecords<String, Order> consumerRecordes = records.iterator().
-		HelperLogKafka.log2(records, "Processing new order, checking for fraud", "Order processed");
+		helperLogKafka.log(records, "Processing new order, checking for fraud", "Order processed");
 	}
 
 	private static Properties properties() {

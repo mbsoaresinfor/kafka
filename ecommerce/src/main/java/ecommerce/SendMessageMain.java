@@ -9,9 +9,10 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public class SendMessageMain {
 
 	static KaftaProducerService<String, Order> producerOrder = new KaftaProducerService<String, Order>(
-			buildPropertiesProduerOrder());
+			buildPropertiesProducerOrder());
 
-	static KaftaProducerService<String, String> producerEmail = new KaftaProducerService<String, String>();
+	static KaftaProducerService<String, Email> producerEmail = new KaftaProducerService<String, Email>
+			(buildPropertiesProducerEmail());
 
 	public static void main(String[] args) throws Exception {
 
@@ -25,16 +26,25 @@ public class SendMessageMain {
 
 		for (int i = 0; i < tamMessage; i++) {
 			var key = UUID.randomUUID().toString();
-			var value = "Mensagem de e-mail, " + key;
-			producerEmail.send("ECOMMERCE_SEND_EMAIL", key, value);
+			var subject = "meu titulo\n";
+			var body = "Mensagem de e-mail, " + key;
+			var email = new Email(subject,body);
+			producerEmail.send("ECOMMERCE_SEND_EMAIL", key, email);
 		}
 
 	}
 
-	private static Properties buildPropertiesProduerOrder() {
+	private static Properties buildPropertiesProducerOrder() {
 		var properties = new Properties();
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, OrderSerializer.class.getName());
+		return properties;
+	}
+	
+	private static Properties buildPropertiesProducerEmail() {
+		var properties = new Properties();
+		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EmailSerializer.class.getName());
 		return properties;
 	}
 
