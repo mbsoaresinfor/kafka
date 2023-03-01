@@ -1,4 +1,4 @@
-package ecommerce;
+package ecommerce.commons.kafka;
 
 import java.util.Properties;
 import org.apache.kafka.clients.producer.Callback;

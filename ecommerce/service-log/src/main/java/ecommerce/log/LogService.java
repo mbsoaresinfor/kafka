@@ -1,4 +1,4 @@
-package ecommerce;
+package ecommerce.log;
 
 import java.util.Properties;
 import java.util.UUID;
@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
+
+import ecommerce.commons.kafka.HelperLogKafka;
+import ecommerce.commons.kafka.KaftaConsumerService;
 
 public class LogService {
 

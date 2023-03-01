@@ -1,9 +1,13 @@
-package ecommerce;
+package ecommerce.email;
 
 import java.util.Properties;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+
+import ecommerce.commons.kafka.EmailDeserializer;
+import ecommerce.commons.kafka.HelperLogKafka;
+import ecommerce.commons.kafka.KaftaConsumerService;
 
 public class EmailService {
 
@@ -28,6 +32,7 @@ public class EmailService {
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,
 				EmailService.class.getSimpleName() + "-" + UUID.randomUUID());
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,EmailDeserializer.class.getName());
+		properties.setProperty(EmailDeserializer.TYPE_CONFIG, Email.class.getName());
 		return properties;
 	}
 }

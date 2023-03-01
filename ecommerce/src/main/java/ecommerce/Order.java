@@ -9,6 +9,6 @@ public class Order {
 	}
 	
 	
-	String id;
-	String value;
+	public String id;
+	public  String value;
 }

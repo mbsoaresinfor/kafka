@@ -6,6 +6,10 @@ import java.util.UUID;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import ecommerce.commons.kafka.EmailSerializer;
+import ecommerce.commons.kafka.KaftaProducerService;
+import ecommerce.commons.kafka.OrderSerializer;
+
 public class SendMessageMain {
 
 	static KaftaProducerService<String, Order> producerOrder = new KaftaProducerService<String, Order>(
@@ -16,7 +20,7 @@ public class SendMessageMain {
 
 	public static void main(String[] args) throws Exception {
 
-		var tamMessage = 5;
+		var tamMessage = 10;
 		for (int i = 0; i < tamMessage; i++) {
 			var key = UUID.randomUUID().toString();
 			var value = "VALUE_" + key;
@@ -24,13 +28,13 @@ public class SendMessageMain {
 			producerOrder.send("ECOMMERCE_NEW_ORDER", key, order);
 		}
 
-		for (int i = 0; i < tamMessage; i++) {
-			var key = UUID.randomUUID().toString();
-			var subject = "meu titulo\n";
-			var body = "Mensagem de e-mail, " + key;
-			var email = new Email(subject,body);
-			producerEmail.send("ECOMMERCE_SEND_EMAIL", key, email);
-		}
+//		for (int i = 0; i < tamMessage; i++) {
+//			var key = UUID.randomUUID().toString();
+//			var subject = "meu titulo";
+//			var body = "Mensagem de e-mail, " + key;
+//			var email = new Email(subject,body);
+//			producerEmail.send("ECOMMERCE_SEND_EMAIL", key, email);
+//		}
 
 	}
 
