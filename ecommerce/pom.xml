@@ -27,15 +27,8 @@
 	    <version>2.10.1</version>
 	</dependency>
 
-	
-	
-  
+	  
   </dependencies>
   
-  <modules>
-  	<module>service-fraud-detector_1</module>
-  	<module>commons-kafka</module>
-  	<module>service-email</module>
-  	<module>service-log</module>
-  </modules>
+  
 </project>
