@@ -1,4 +1,4 @@
-package ecommerce.fraud.detector;
+package ecommerce.financial;
 
 import java.util.Properties;
 import java.util.UUID;
@@ -14,7 +14,7 @@ import ecommerce.commons.kafka.OrderDeserializer;
 import ecommerce.commons.kafka.OrderSerializer;
 import ecommerce.service.order.Order;
 
-public class FraudDetectorService {
+public class FinancialService {
 
 	HelperLogKafka<String, Order> helperLogKafka = new HelperLogKafka<String, Order>();
 	static KaftaProducerService<String, Order> producerService = new KaftaProducerService<String, Order>(
@@ -22,14 +22,14 @@ public class FraudDetectorService {
 
 	public static void main(String[] args) throws Exception {
 
-		var fraudDetectorService = new FraudDetectorService();
+		var financialService = new FinancialService();
 
 		var consumerOrderNew = new KaftaConsumerService<String, Order>("ORDER_NEW",
-				fraudDetectorService::processOrderNew, buildPropertiesConsumer());
+				financialService::processOrderNew, buildPropertiesConsumer());
 		consumerOrderNew.process();
 
 		var consumerOrderCancel = new KaftaConsumerService<String, Order>("ORDER_CANCEL", 
-				fraudDetectorService::processOrderCancel,
+				financialService::processOrderCancel,
 			buildPropertiesConsumer());
 		consumerOrderCancel.process();
 
@@ -43,15 +43,15 @@ public class FraudDetectorService {
 
 	void processOrderNew(ConsumerRecords<String, Order> records) {
 		try {
-			helperLogKafka.log(records, "Processing new order, checking for fraud", "Order processed");
+			helperLogKafka.log(records, "Processing new order, checking financial", "Order processed");
 			for (var record : records) {
 				var order = record.value();
-				if (order.value.floatValue() > 1000) {
-					System.out.println("The order " + order.id + " is one fraude");
-					producerService.send("ORDER_FRAUD_ERROR", order.id, order);
+				if (order.age < 18 ) {
+					System.out.println("The order " + order.id + " has problem financial");
+					producerService.send("ORDER_FINANCIAL_ERROR", order.id, order);
 				} else {
-					System.out.println("The order " + order.id + " is OK");
-					producerService.send("ORDER_FRAUD_OK", order.id, order);
+					System.out.println("The order " + order.id + " is OK financial");
+					producerService.send("ORDER_FINANCIAL_OK", order.id, order);
 				}
 			}
 		} catch (Exception e) {
@@ -68,9 +68,9 @@ public class FraudDetectorService {
 
 	private static Properties buildPropertiesConsumer() {
 		var properties = new Properties();
-		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.getSimpleName());		
+		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FinancialService.class.getSimpleName());		
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,
-				FraudDetectorService.class.getSimpleName() + "-" + UUID.randomUUID());
+				FinancialService.class.getSimpleName() + "-" + UUID.randomUUID());
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, OrderDeserializer.class.getName());
 		properties.setProperty(OrderDeserializer.TYPE_CONFIG, Order.class.getName());
 		return properties;

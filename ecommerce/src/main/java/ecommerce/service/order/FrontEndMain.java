@@ -15,7 +15,9 @@ public class FrontEndMain {
 				var id = teclado.next();
 				System.out.println("digite o valor do pedido");
 				var valueOrder = teclado.next();
-				orderService.receiverOrderNew(new Order(id, new BigDecimal(valueOrder)));
+				System.out.println("digite aidade do cliente");
+				var age = teclado.nextInt();
+				orderService.receiverOrderNew(new Order(id, new BigDecimal(valueOrder),age));
 			}
 		}
 //		while(true) {
