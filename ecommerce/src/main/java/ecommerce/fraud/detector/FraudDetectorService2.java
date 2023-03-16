@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 import ecommerce.commons.kafka.HelperLogKafka;
 import ecommerce.commons.kafka.KaftaConsumerService;
-import ecommerce.commons.kafka.OrderDeserializer;
+import ecommerce.commons.kafka.MessageDeserializer;
 import ecommerce.service.order.Order;
 
 public class FraudDetectorService2 {
@@ -32,8 +32,8 @@ public class FraudDetectorService2 {
 		UUID.randomUUID();
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,
 				FraudDetectorService2.class.getSimpleName() + "-" + UUID.randomUUID());
-		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,OrderDeserializer.class.getName());
-		properties.setProperty(OrderDeserializer.TYPE_CONFIG,Order.class.getName());
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,MessageDeserializer.class.getName());
+		properties.setProperty(MessageDeserializer.TYPE_CONFIG,Order.class.getName());
 		
 		return properties;
 	}

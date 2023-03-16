@@ -6,7 +6,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 
 import com.google.gson.Gson;
 
-public class OrderDeserializer<T> implements Deserializer<T> {
+public class MessageDeserializer<T> implements Deserializer<T> {
 
 	public static final String TYPE_CONFIG = "type_config";
 	

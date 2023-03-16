@@ -8,7 +8,7 @@ public class FrontEndMain {
 	static OrderService orderService = new OrderService();
 
 	public static void main(String[] args) throws Exception {
-
+		Thread.sleep(4000);
 		try (Scanner teclado = new Scanner(System.in)) {
 			while (true) {
 				System.out.println("digite o n. do pedido");

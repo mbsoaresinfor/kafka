@@ -14,23 +14,17 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import ecommerce.commons.kafka.KaftaConsumerService;
 import ecommerce.commons.kafka.KaftaProducerService;
-import ecommerce.commons.kafka.OrderDeserializer;
-import ecommerce.commons.kafka.OrderSerializer;
+import ecommerce.commons.kafka.Message;
+import ecommerce.commons.kafka.MessageDeserializer;
+import ecommerce.commons.kafka.MessageSerializer;
 import ecommerce.financial.FinancialService;
 import ecommerce.fraud.detector.FraudDetectorService;
-import ecommerce.service.order.orchestration.OrchestrationNewOrderEntity;
-import ecommerce.service.order.orchestration.OrchestrationNewOrderManager;
-import ecommerce.service.order.orchestration.stepservice.StepGroup;
-import ecommerce.service.order.orchestration.stepservice.StepGroupNames;
-import ecommerce.service.order.orchestration.stepservice.StepNames;
-import ecommerce.service.order.orchestration.stepservice.StepStatus;
 
 public class OrderService {
 
-	Map<String, TransactionOrder> mapTransactionOrder = new HashMap<String, TransactionOrder>();
-	private final OrchestrationNewOrderManager orchestrationNewOrderManager = new OrchestrationNewOrderManager();
+	Map<String, TransactionOrder> mapTransactionOrder = new HashMap<String, TransactionOrder>();	
 
-	KaftaProducerService<String, Order> producerOrder = new KaftaProducerService<String, Order>(
+	KaftaProducerService<String, Message<Order>> producerOrder = new KaftaProducerService<String, Message<Order>>(
 			buildPropertiesProducerOrder());
 
 	KaftaConsumerService<String, Order> consumerOrderFraudOk = new KaftaConsumerService<String, Order>(
@@ -55,68 +49,36 @@ public class OrderService {
 	}
 
 	
-	private void updateStatusOfStages(ConsumerRecords<String, Order> records, 
-									StepGroupNames groupStageName,StepNames stageName, StepStatus stageStatus) {
-		
-		
-		
-		for (var record : records) {
-			OrchestrationNewOrderEntity orchestrationStep = mapOrchestrationNewOrder.get(record.value().id);
-			if (orchestrationStep != null) {
-				StepGroup groupStage =  orchestrationStep.getGroupStage(groupStageName);
-				StepStatus stageStatusForUpdate = groupStage.getStages(stageName).get();
-				stageStatusForUpdate =  stageStatus;				
-			}
-		}		
-	}
-	
-	private List<String> listIdOrchestrationNewOrder(ConsumerRecords<String, Order> records){
+	private List<String> toListIdtransactionOrder(ConsumerRecords<String, Order> records){
 		List<String> ids = new ArrayList<>();
 		Iterator<ConsumerRecord<String, Order>> it = records.iterator();
 		while(it.hasNext()) {
 			ids.add(it.next().value().id);
 		}
 		return ids;
-	}
+	}	
 	
-	private void callOrchestrationOrderNew(ConsumerRecords<String, Order> records) {
-		for (var record : records) {
-			OrchestrationNewOrderEntity transactionOrder = mapOrchestrationNewOrder.get(record.value().id);
-			if (transactionOrder != null) {
-				orchestrationOrderNew(transactionOrder);
-			}
-		}
-	}
 	void processOrderFinancialServiceOk(ConsumerRecords<String, Order> records) {
-		updateStatusOfStages(records,StepGroupNames.FINANCIAL,StepNames.FINANCIAL_SERVICE,StepStatus.PROCESSED_OK);
-		callOrchestrationOrderNew(records);
+		
+		
 	}
 
 	void processOrderFinancialServiceError(ConsumerRecords<String, Order> records) {
-		updateStatusOfStages(records,StepGroupNames.FINANCIAL,StepNames.FINANCIAL_SERVICE,StepStatus.PROCESSED_ERROR);
-		callOrchestrationOrderNew(records);
+		
+		
 	}
 
 	void processOrderFraudServiceOk(ConsumerRecords<String, Order> records) {
-		updateStatusOfStages(records,StepGroupNames.FINANCIAL,StepNames.DETECTOR_FRAUDE_SERVICE,StepStatus.PROCESSED_OK);
-		callOrchestrationOrderNew(records);		
+	
+				
 	}
 
 	void processOrderFraudServiceError(ConsumerRecords<String, Order> records) {
-		updateStatusOfStages(records,StepGroupNames.FINANCIAL,StepNames.DETECTOR_FRAUDE_SERVICE,StepStatus.PROCESSED_ERROR);
-		callOrchestrationOrderNew(records);		
-	}
-
-	
-	void orchestrationOrderNew(OrchestrationNewOrderEntity transactionOrder) {
-		System.out.println("Processing ORCHESTRATIN ORDER NEW");
 		
-		processGroupStageFinancial(transactionOrder);
-
 	}
+	
 
-
-	private void processGroupStageFinancial(OrchestrationNewOrderEntity transactionOrder) {
+	//*private void processGroupStageFinancial(OrchestrationNewOrderEntity transactionOrder) {
 
 		// finalizado ok: 
 		//	* todos services ok
@@ -131,7 +93,7 @@ public class OrderService {
 		// * qq servicoes unprocessed ou processed
 	//	transactionOrder.getGroupStage(GroupStageNames.FINANCIAL).mapStages().values().stream().
 		
-	}
+	//}
 
 
 //	private boolean isProcessedGroupStageFinancial(TransactionOrder transactionOrder) {
@@ -147,8 +109,10 @@ public class OrderService {
 
 		try {
 			var transaction = new TransactionOrder(order.id, order);			
-			orchestrationNewOrderManager.startNewOrchestration(transaction);
-			producerOrder.send("ORDER_NEW", order.id, order);
+			//orchestrationNewOrderManager.startNewOrchestration(order.id);
+			Message<Order> message = new Message<Order>(order, OrderService.class.getSimpleName());
+			message.setCorrelationId(OrderService.class.getSimpleName());
+			producerOrder.send("ORDER_NEW", order.id, message);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -158,7 +122,7 @@ public class OrderService {
 	private static Properties buildPropertiesProducerOrder() {
 		var properties = new Properties();
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, OrderSerializer.class.getName());
+		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, MessageSerializer.class.getName());
 		return properties;
 	}
 
@@ -167,8 +131,8 @@ public class OrderService {
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.getSimpleName());		
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,
 				FraudDetectorService.class.getSimpleName() + "-" + UUID.randomUUID());
-		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, OrderDeserializer.class.getName());
-		properties.setProperty(OrderDeserializer.TYPE_CONFIG, Order.class.getName());
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, MessageDeserializer.class.getName());
+		properties.setProperty(MessageDeserializer.TYPE_CONFIG, Order.class.getName());
 		return properties;
 	}
 	
@@ -177,8 +141,8 @@ public class OrderService {
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FinancialService.class.getSimpleName());		
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,
 				FinancialService.class.getSimpleName() + "-" + UUID.randomUUID());
-		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, OrderDeserializer.class.getName());
-		properties.setProperty(OrderDeserializer.TYPE_CONFIG, Order.class.getName());
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, MessageDeserializer.class.getName());
+		properties.setProperty(MessageDeserializer.TYPE_CONFIG, Order.class.getName());
 		return properties;
 	}
 

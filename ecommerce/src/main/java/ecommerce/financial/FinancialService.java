@@ -10,48 +10,52 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import ecommerce.commons.kafka.HelperLogKafka;
 import ecommerce.commons.kafka.KaftaConsumerService;
 import ecommerce.commons.kafka.KaftaProducerService;
-import ecommerce.commons.kafka.OrderDeserializer;
-import ecommerce.commons.kafka.OrderSerializer;
+import ecommerce.commons.kafka.Message;
+import ecommerce.commons.kafka.MessageDeserializer;
+import ecommerce.commons.kafka.MessageSerializer;
 import ecommerce.service.order.Order;
 
 public class FinancialService {
 
-	HelperLogKafka<String, Order> helperLogKafka = new HelperLogKafka<String, Order>();
-	static KaftaProducerService<String, Order> producerService = new KaftaProducerService<String, Order>(
+	HelperLogKafka<String, Message<Order>> helperLogKafka = new HelperLogKafka<String, Message<Order>>();
+	static KaftaProducerService<String, Message<Order>> producerService = new KaftaProducerService<String, Message<Order>>(
 			buildPropertiesProducer());
 
 	public static void main(String[] args) throws Exception {
 
 		var financialService = new FinancialService();
 
-		var consumerOrderNew = new KaftaConsumerService<String, Order>("ORDER_NEW",
-				financialService::processOrderNew, buildPropertiesConsumer());
-		consumerOrderNew.process();
+		var consumerOrderFraudOK = new KaftaConsumerService<String, Message<Order>>("ORDER_FRAUD_OK",
+				financialService::processOrderFraudOk, buildPropertiesConsumer());
+		consumerOrderFraudOK.process();
 
-		var consumerOrderCancel = new KaftaConsumerService<String, Order>("ORDER_CANCEL", 
+		var consumerOrderCancel = new KaftaConsumerService<String, Message<Order>>("ORDER_CANCEL", 
 				financialService::processOrderCancel,
 			buildPropertiesConsumer());
 		consumerOrderCancel.process();
 
 	}
 
-	void processOrderCancel(ConsumerRecords<String, Order> records) {
+	void processOrderCancel(ConsumerRecords<String, Message<Order>> records) {
 		// IMPLLEENTAR SAGA
 		helperLogKafka.log(records, "Processing cancel order", "Order processed");
 
 	}
 
-	void processOrderNew(ConsumerRecords<String, Order> records) {
+	void processOrderFraudOk(ConsumerRecords<String, Message<Order>> records) {
 		try {
-			helperLogKafka.log(records, "Processing new order, checking financial", "Order processed");
+			helperLogKafka.log(records, "Processing order fraud ok, checking financial", "Order processed");
 			for (var record : records) {
-				var order = record.value();
-				if (order.age < 18 ) {
+				Message<Order> message = record.value();
+				var order = message.getPayload();
+				if (order.age >= 18 ) {
 					System.out.println("The order " + order.id + " has problem financial");
-					producerService.send("ORDER_FINANCIAL_ERROR", order.id, order);
+					message.setCorrelationId(FinancialService.class.getSimpleName());
+					producerService.send("ECOMMERCE_SEND_EMAIL", order.id, record.value());
 				} else {
 					System.out.println("The order " + order.id + " is OK financial");
-					producerService.send("ORDER_FINANCIAL_OK", order.id, order);
+					message.setCorrelationId(FinancialService.class.getSimpleName());
+					producerService.send("ORDER_FINANCIAL_ERROR", order.id, record.value());
 				}
 			}
 		} catch (Exception e) {
@@ -62,7 +66,7 @@ public class FinancialService {
 	private static Properties buildPropertiesProducer() {
 		var properties = new Properties();
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, OrderSerializer.class.getName());
+		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, MessageSerializer.class.getName());
 		return properties;
 	}
 
@@ -71,8 +75,8 @@ public class FinancialService {
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FinancialService.class.getSimpleName());		
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,
 				FinancialService.class.getSimpleName() + "-" + UUID.randomUUID());
-		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, OrderDeserializer.class.getName());
-		properties.setProperty(OrderDeserializer.TYPE_CONFIG, Order.class.getName());
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, MessageDeserializer.class.getName());
+		properties.setProperty(MessageDeserializer.TYPE_CONFIG, Order.class.getName());
 		return properties;
 	}
 }
