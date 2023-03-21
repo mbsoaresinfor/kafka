@@ -12,18 +12,18 @@ public class CorrelationId {
 	}
 	
 	public void setCorrelationId(String correlationId) {
-		if(Objects.isNull(this.correlationId)) {
-			this.correlationId = buildCorrelationId(correlationId);
-		}else {
-			correlationId = " , "  + buildCorrelationId(correlationId);
-		}
+		buildCorrelationId(correlationId);
 	}
 	
 	private String buildCorrelationId(String correlationId) {
-		return new StringBuilder(correlationId).append(":").append(new Date().toString()).toString();
+		return new StringBuilder(this.correlationId == null ? "" : this.correlationId)
+				.append("\n")
+				.append(correlationId == null ? "" : correlationId)
+				.append(":")
+				.append(new Date().toString()).toString();
 	}
 	
-	public String getId() {
+	public String getCorrelationId() {
 		return correlationId;
 	}
 

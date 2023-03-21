@@ -1,23 +1,17 @@
 package ecommerce.commons.kafka;
 
 
-import java.util.Map;
-
 import org.apache.kafka.common.serialization.Serializer;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
-public class MessageSerializer<T> implements Serializer<T> {
+public class MessageSerializer implements Serializer<Message> {
 
-	private Gson gson = new Gson();
-
-	@Override
-	public void configure(Map<String, ?> configs, boolean isKey) {
-		gson.newBuilder().registerTypeAdapter(getClass(), configs)
-	}
+	private final Gson gson = new GsonBuilder().registerTypeAdapter(Message.class, new MessageAdapter()).create();
 	
 	@Override
-	public byte[] serialize(String topic, T data) {
+	public byte[] serialize(String topic, Message data) {
 
 		if (data == null)
 			return null;

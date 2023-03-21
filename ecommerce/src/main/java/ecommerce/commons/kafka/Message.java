@@ -25,6 +25,12 @@ public class Message<T> {
 	public void setPayload(T payload) {
 		this.payload = payload;
 	}
+
+	@Override
+	public String toString() {
+		return "Message [correlationId=" + correlationId + ", payload=" + payload + "]";
+	}
+	
 	
 	
 	

@@ -14,6 +14,8 @@ public class MessageAdapter implements JsonSerializer<Message>, JsonDeserializer
         return obj;
     }
 
+	
+
     @Override
     public Message deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
       
@@ -23,7 +25,7 @@ public class MessageAdapter implements JsonSerializer<Message>, JsonDeserializer
         try {
             // maybe you want to use a "accept list"
             var payload = context.deserialize(obj.get("payload"), Class.forName(payloadType));
-            return new Message(payload,correlationId);
+            return new Message(payload,correlationId.getCorrelationId());
         } catch (ClassNotFoundException e) {
             // you might want to deal with this exception
             throw new JsonParseException(e);
