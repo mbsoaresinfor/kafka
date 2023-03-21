@@ -15,7 +15,7 @@ public class Message<T> {
 	}
 
 	public void setCorrelationId(String correlationId) {
-		this.correlationId.setCorrelationId(correlationId);
+		this.correlationId.appendCorrelationId(correlationId);
 	}
 
 	public T getPayload() {

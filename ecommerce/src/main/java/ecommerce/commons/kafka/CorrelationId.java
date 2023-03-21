@@ -8,19 +8,29 @@ public class CorrelationId {
 	private String correlationId;
 	
 	public CorrelationId(String correlationId) {
-		this.setCorrelationId(correlationId);
+		this.correlationId =  buildCorrelationId(correlationId);
 	}
 	
-	public void setCorrelationId(String correlationId) {
-		buildCorrelationId(correlationId);
+	public void appendCorrelationId(String correlationId) {
+		if(isInvalidCorrelationId(correlationId)) return;
+		this.correlationId = new StringBuilder(this.correlationId)
+							.append(" | ")
+							.append(buildCorrelationId(correlationId))							
+							.toString();
+	}
+	
+	private boolean isInvalidCorrelationId(String correlationId) {
+		return correlationId == null || "".equals(correlationId);
 	}
 	
 	private String buildCorrelationId(String correlationId) {
-		return new StringBuilder(this.correlationId == null ? "" : this.correlationId)
-				.append("\n")
-				.append(correlationId == null ? "" : correlationId)
+		if(isInvalidCorrelationId(correlationId)) return "";
+		else {
+			return new StringBuilder(correlationId)
 				.append(":")
-				.append(new Date().toString()).toString();
+				.append("teste")				
+				.toString();
+		}				
 	}
 	
 	public String getCorrelationId() {
@@ -29,7 +39,7 @@ public class CorrelationId {
 
 	@Override
 	public String toString() {
-		return "CorrelationId [correlationId=" + correlationId + "]";
+		return "CorrelationId [" + correlationId + "]";
 	}
 	
 	
