@@ -110,8 +110,8 @@ public class OrderService {
 		try {
 			var transaction = new TransactionOrder(order.id, order);			
 			//orchestrationNewOrderManager.startNewOrchestration(order.id);
-			Message<Order> message = new Message<Order>(order, OrderService.class.getSimpleName());
-			//message.setCorrelationId(OrderService.class.getSimpleName());
+			Message<Order> message = new Message<Order>(order);
+			message.appendCorrelationId(OrderService.class.getSimpleName());
 			producerOrder.send("ORDER_NEW", order.id, message);
 
 		} catch (Exception e) {

@@ -5,17 +5,21 @@ public class Message<T> {
 	private CorrelationId correlationId;
 	private T payload;
 	
-	public Message(T payload, String correlationId) {
+	public Message(T payload) {
 		this.payload =payload;
-		this.correlationId = new CorrelationId(correlationId);
+		this.correlationId = new CorrelationId();
 	}
 
 	public CorrelationId getCorrelationId() {
 		return correlationId;
 	}
 
-	public void setCorrelationId(String correlationId) {
+	public void appendCorrelationId(String correlationId) {
 		this.correlationId.appendCorrelationId(correlationId);
+	}
+	
+	public void setCorrelationId(String correlationId) {
+		this.correlationId.setCorrelationId(correlationId);
 	}
 
 	public T getPayload() {

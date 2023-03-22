@@ -50,11 +50,11 @@ public class FraudDetectorService {
 				var order = record.value().getPayload();
 				if (order.value.floatValue() > 1000) {
 					System.out.println("The order " + order.id + " is one fraude");
-					message.setCorrelationId(FraudDetectorService.class.getSimpleName());
+					message.appendCorrelationId(FraudDetectorService.class.getSimpleName());
 					producerService.send("ORDER_FRAUD_ERROR", order.id, message);
 				} else {
 					System.out.println("The order " + order.id + " is OK");
-					message.setCorrelationId(FraudDetectorService.class.getSimpleName());
+					message.appendCorrelationId(FraudDetectorService.class.getSimpleName());
 					producerService.send("ORDER_FRAUD_OK", order.id, message);
 				}
 			}

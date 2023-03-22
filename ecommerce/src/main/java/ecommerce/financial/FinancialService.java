@@ -50,11 +50,11 @@ public class FinancialService {
 				var order = message.getPayload();
 				if (order.age >= 18 ) {
 					System.out.println("The order " + order.id + " has problem financial");
-					message.setCorrelationId(FinancialService.class.getSimpleName());
+					message.appendCorrelationId(FinancialService.class.getSimpleName());
 					producerService.send("ECOMMERCE_SEND_EMAIL", order.id, record.value());
 				} else {
 					System.out.println("The order " + order.id + " is OK financial");
-					message.setCorrelationId(FinancialService.class.getSimpleName());
+					message.appendCorrelationId(FinancialService.class.getSimpleName());
 					producerService.send("ORDER_FINANCIAL_ERROR", order.id, record.value());
 				}
 			}
