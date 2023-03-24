@@ -27,25 +27,16 @@ public class OrderService {
 	KaftaProducerService<String, Message<Order>> producerOrder = new KaftaProducerService<String, Message<Order>>(
 			buildPropertiesProducerOrder());
 
-	KaftaConsumerService<String, Order> consumerOrderFraudOk = new KaftaConsumerService<String, Order>(
-			"ORDER_FRAUD_OK",this::processOrderFraudServiceOk, buildPropertiesConsumerFraud());
+	KaftaConsumerService<String, Message<Order>> consumerOrderNewProcessed = new KaftaConsumerService<String, Message<Order>>(
+			"ECOMMERCE_ORDER_NEW_PROCESSED",this::processOrderNewProcessed, buildPropertiesConsumerFraud());
 
 	KaftaConsumerService<String, Order> consumerOrderFraudError = new KaftaConsumerService<String, Order>(
-			"ORDER_FRAUD_ERROR", this::processOrderFraudServiceError, buildPropertiesConsumerFraud());
-	
-	KaftaConsumerService<String, Order> consumerOrderFinancialError = new KaftaConsumerService<String, Order>(
-			"ORDER_FINANCIAL_ERROR", this::processOrderFinancialServiceError, buildPropertiesConsumerFinancial());
-
-	KaftaConsumerService<String, Order> consumerOrderFinancialOk = new KaftaConsumerService<String, Order>(
-			"ORDER_FINANCIAL_OK", this::processOrderFinancialServiceOk, buildPropertiesConsumerFinancial());
-
+			"ECOMMERCE_ORDER_NEW_ERROR", this::processOrderNewError, buildPropertiesConsumerFraud());
 	
 
 	public OrderService() {
-		new Thread(() -> consumerOrderFraudOk.process()).start();
-		new Thread(() -> consumerOrderFraudError.process()).start();
-		new Thread(() -> consumerOrderFinancialOk.process()).start();
-		new Thread(() -> consumerOrderFinancialError.process()).start();
+		new Thread(() -> consumerOrderNewProcessed.process()).start();
+		new Thread(() -> consumerOrderFraudError.process()).start();		
 	}
 
 	
@@ -57,54 +48,17 @@ public class OrderService {
 		}
 		return ids;
 	}	
-	
-	void processOrderFinancialServiceOk(ConsumerRecords<String, Order> records) {
-		
-		
-	}
 
-	void processOrderFinancialServiceError(ConsumerRecords<String, Order> records) {
-		
-		
-	}
 
-	void processOrderFraudServiceOk(ConsumerRecords<String, Order> records) {
-	
+	void processOrderNewProcessed(ConsumerRecords<String, Message<Order>> records) {
+		System.out.println("PROCESSADA ORDER COM SUCESSO");
 				
 	}
 
-	void processOrderFraudServiceError(ConsumerRecords<String, Order> records) {
+	void processOrderNewError(ConsumerRecords<String, Order> records) {
 		
 	}
 	
-
-	//*private void processGroupStageFinancial(OrchestrationNewOrderEntity transactionOrder) {
-
-		// finalizado ok: 
-		//	* todos services ok
-		//	* todos orquestracao un processed
-		//
-		
-		// finalizado erro
-		//  * algum  services error
-		// * todos orquestracao un processed
-		
-		// não fazer nada
-		// * qq servicoes unprocessed ou processed
-	//	transactionOrder.getGroupStage(GroupStageNames.FINANCIAL).mapStages().values().stream().
-		
-	//}
-
-
-//	private boolean isProcessedGroupStageFinancial(TransactionOrder transactionOrder) {
-//		
-//	}
-//		return transactionOrder.dectectorFraudService.equals(StageStatus.PROCESSED_OK) 
-//				&& transactionOrder.dectectorFraudOrchestration.equals(StageStatus.UNPROCESSED)
-//				&& transactionOrder.financialService.equals(StageStatus.PROCESSED_OK)
-//				&& transactionOrder.financialOrchestration.equals(StageStatus.UNPROCESSED);
-	//}
-
 	public void receiverOrderNew(Order order) {
 
 		try {
@@ -112,7 +66,7 @@ public class OrderService {
 			//orchestrationNewOrderManager.startNewOrchestration(order.id);
 			Message<Order> message = new Message<Order>(order);
 			message.appendCorrelationId(OrderService.class.getSimpleName());
-			producerOrder.send("ORDER_NEW", order.id, message);
+			producerOrder.send("ECOMMERCE_ORDER_NEW", order.id, message);
 
 		} catch (Exception e) {
 			e.printStackTrace();

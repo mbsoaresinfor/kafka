@@ -25,18 +25,18 @@ public class FraudDetectorService {
 
 		var fraudDetectorService = new FraudDetectorService();
 
-		var consumerOrderNew = new KaftaConsumerService<String, Message<Order>>("ORDER_NEW",
+		var consumerOrderNew = new KaftaConsumerService<String, Message<Order>>("ECOMMERCE_ORDER_NEW",
 				fraudDetectorService::processOrderNew, buildPropertiesConsumer());
 		consumerOrderNew.process();
 
-		var consumerOrderCancel = new KaftaConsumerService<String, Message<Order>>("ORDER_CANCEL", 
-				fraudDetectorService::processOrderCancel,
+		var consumerOrderNewError = new KaftaConsumerService<String, Message<Order>>("ECOMMERCE_ORDER_NEW_ERROR", 
+				fraudDetectorService::processOrderNewError,
 			buildPropertiesConsumer());
-		consumerOrderCancel.process();
+		consumerOrderNewError.process();
 
 	}
 
-	void processOrderCancel(ConsumerRecords<String, Message<Order>> records) {
+	void processOrderNewError(ConsumerRecords<String, Message<Order>> records) {
 		// IMPLLEENTAR SAGA
 		helperLogKafka.log(records, "Processing cancel order", "Order processed");
 
@@ -51,11 +51,11 @@ public class FraudDetectorService {
 				if (order.value.floatValue() > 1000) {
 					System.out.println("The order " + order.id + " is one fraude");
 					message.appendCorrelationId(FraudDetectorService.class.getSimpleName());
-					producerService.send("ORDER_FRAUD_ERROR", order.id, message);
+					producerService.send("ECOMMERCE_ORDER_NEW_ERROR", order.id, message);
 				} else {
 					System.out.println("The order " + order.id + " is OK");
 					message.appendCorrelationId(FraudDetectorService.class.getSimpleName());
-					producerService.send("ORDER_FRAUD_OK", order.id, message);
+					producerService.send("ECOMMERCE_ORDER_NEW_FRAUD_OK", order.id, message);
 				}
 			}
 		} catch (Exception e) {

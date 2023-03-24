@@ -25,37 +25,37 @@ public class FinancialService {
 
 		var financialService = new FinancialService();
 
-		var consumerOrderFraudOK = new KaftaConsumerService<String, Message<Order>>("ORDER_FRAUD_OK",
-				financialService::processOrderFraudOk, buildPropertiesConsumer());
+		var consumerOrderFraudOK = new KaftaConsumerService<String, Message<Order>>("ECOMMERCE_ORDER_NEW_FRAUD_OK",
+				financialService::processOrderNewFraudOk, buildPropertiesConsumer());
 		consumerOrderFraudOK.process();
 
-		var consumerOrderCancel = new KaftaConsumerService<String, Message<Order>>("ORDER_CANCEL", 
-				financialService::processOrderCancel,
+		var consumerOrderNewError = new KaftaConsumerService<String, Message<Order>>("ECOMMERCE_ORDER_NEW_ERROR", 
+				financialService::processOrderNewError,
 			buildPropertiesConsumer());
-		consumerOrderCancel.process();
+		consumerOrderNewError.process();
 
 	}
 
-	void processOrderCancel(ConsumerRecords<String, Message<Order>> records) {
+	void processOrderNewError(ConsumerRecords<String, Message<Order>> records) {
 		// IMPLLEENTAR SAGA
 		helperLogKafka.log(records, "Processing cancel order", "Order processed");
 
 	}
 
-	void processOrderFraudOk(ConsumerRecords<String, Message<Order>> records) {
+	void processOrderNewFraudOk(ConsumerRecords<String, Message<Order>> records) {
 		try {
 			helperLogKafka.log(records, "Processing order fraud ok, checking financial", "Order processed");
 			for (var record : records) {
 				Message<Order> message = record.value();
 				var order = message.getPayload();
-				if (order.age >= 18 ) {
+				if (order.age < 18 ) {
 					System.out.println("The order " + order.id + " has problem financial");
 					message.appendCorrelationId(FinancialService.class.getSimpleName());
-					producerService.send("ECOMMERCE_SEND_EMAIL", order.id, record.value());
+					producerService.send("ECOMMERCE_ORDER_NEW_ERROR", order.id, record.value());
 				} else {
 					System.out.println("The order " + order.id + " is OK financial");
 					message.appendCorrelationId(FinancialService.class.getSimpleName());
-					producerService.send("ORDER_FINANCIAL_ERROR", order.id, record.value());
+					producerService.send("ECOMMERCE_ORDER_NEW_FINANCIAL_OK", order.id, record.value());
 				}
 			}
 		} catch (Exception e) {
